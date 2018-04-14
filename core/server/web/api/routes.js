@@ -12,7 +12,9 @@ var express = require('express'),
 
     // Handling uploads & imports
     tmpdir = require('os').tmpdir,
-    upload = require('multer')({dest: tmpdir()}),
+    upload = require('multer')({
+        dest: tmpdir()
+    }),
     validation = require('../middleware/validation'),
 
     // Temporary
@@ -74,13 +76,15 @@ module.exports = function apiRoutes() {
     apiRouter.del('/tags/:id', mw.authenticatePrivate, api.http(api.tags.destroy));
 
     // ## Subscribers
-    apiRouter.get('/subscribers', labs.subscribers, mw.authenticatePrivate, api.http(api.subscribers.browse));
+    apiRouter.get('/subscribers', labs.subscribers, /* private */ mw.authenticatePublic, api.http(api.subscribers.browse));
     apiRouter.get('/subscribers/csv', labs.subscribers, mw.authenticatePrivate, api.http(api.subscribers.exportCSV));
     apiRouter.post('/subscribers/csv',
         labs.subscribers,
         mw.authenticatePrivate,
         upload.single('subscribersfile'),
-        validation.upload({type: 'subscribers'}),
+        validation.upload({
+            type: 'subscribers'
+        }),
         api.http(api.subscribers.importCSV)
     );
     apiRouter.get('/subscribers/:id', labs.subscribers, mw.authenticatePrivate, api.http(api.subscribers.read));
@@ -110,7 +114,9 @@ module.exports = function apiRoutes() {
     apiRouter.post('/themes/upload',
         mw.authenticatePrivate,
         upload.single('theme'),
-        validation.upload({type: 'themes'}),
+        validation.upload({
+            type: 'themes'
+        }),
         api.http(api.themes.upload)
     );
 
@@ -134,7 +140,9 @@ module.exports = function apiRoutes() {
     apiRouter.post('/db',
         mw.authenticatePrivate,
         upload.single('importfile'),
-        validation.upload({type: 'db'}),
+        validation.upload({
+            type: 'db'
+        }),
         api.http(api.db.importContent)
     );
     apiRouter.del('/db', mw.authenticatePrivate, api.http(api.db.deleteAllContent));
@@ -173,7 +181,9 @@ module.exports = function apiRoutes() {
     apiRouter.post('/uploads',
         mw.authenticatePrivate,
         upload.single('uploadimage'),
-        validation.upload({type: 'images'}),
+        validation.upload({
+            type: 'images'
+        }),
         api.http(api.uploads.add)
     );
 
@@ -182,7 +192,9 @@ module.exports = function apiRoutes() {
     apiRouter.post('/uploads/icon',
         mw.authenticatePrivate,
         upload.single('uploadimage'),
-        validation.upload({type: 'icons'}),
+        validation.upload({
+            type: 'icons'
+        }),
         validation.blogIcon(),
         api.http(api.uploads.add)
     );
@@ -198,13 +210,19 @@ module.exports = function apiRoutes() {
     apiRouter.post('/redirects/json',
         mw.authenticatePrivate,
         upload.single('redirects'),
-        validation.upload({type: 'redirects'}),
+        validation.upload({
+            type: 'redirects'
+        }),
         api.http(api.redirects.upload)
     );
 
     // ## Webhooks (RESTHooks)
     apiRouter.post('/webhooks', mw.authenticatePrivate, api.http(api.webhooks.add));
     apiRouter.del('/webhooks/:id', mw.authenticatePrivate, api.http(api.webhooks.destroy));
+
+    apiRouter.post('/mail/contact', api.http(api.mail.sendContact));
+
+    apiRouter.get('/mail/newsletter/:recipients', api.http(api.mail.sendNewsletter));
 
     return apiRouter;
 };
